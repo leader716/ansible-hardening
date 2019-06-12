@@ -152,6 +152,7 @@
     - V-72195
     - V-72197
     - V-72081
+    - V-72141
 
 - name: Adjust auditd/audispd configurations
   lineinfile:

@@ -213,6 +213,10 @@ audited_commands:
     path: /usr/sbin
     stig_id: V-72157
     arch_specific: no
+  - command: setfiles
+    path: /usr/sbin
+    stig_id: V-72141
+    arch_specific: no
 
 ## Password quality settings
 # This variable is used in main/rhel7stig/auth.yml to set password quality
