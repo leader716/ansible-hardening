@@ -1,0 +1,127 @@
+---
+- name: Ensure kernel module 'udf' is disabled
+  lineinfile:
+    create=yes
+    dest="/etc/modprobe.d/{{item}}.conf"
+    regexp="{{item}}"
+    line="install {{item}} /bin/true"
+  with_items:
+    - udf
+  tags:
+    - kernel_module_udf_disabled
+    - low_severity
+    - disable_strategy
+    - low_complexity
+    - medium_disruption
+    - CCE-80143-1
+    - NIST-800-53-CM-7
+    - NIST-800-171-3.4.6
+
+- name: Ensure kernel module 'squashfs' is disabled
+  lineinfile:
+    create=yes
+    dest="/etc/modprobe.d/{{item}}.conf"
+    regexp="{{item}}"
+    line="install {{item}} /bin/true"
+  with_items:
+    - squashfs
+  tags:
+    - kernel_module_squashfs_disabled
+    - low_severity
+    - disable_strategy
+    - low_complexity
+    - medium_disruption
+    - CCE-80142-3
+    - NIST-800-53-CM-7
+    - NIST-800-171-3.4.6
+
+- name: Ensure kernel module 'hfsplus' is disabled
+  lineinfile:
+    create=yes
+    dest="/etc/modprobe.d/{{item}}.conf"
+    regexp="{{item}}"
+    line="install {{item}} /bin/true"
+  with_items:
+    - hfsplus
+  tags:
+    - kernel_module_hfsplus_disabled
+    - low_severity
+    - disable_strategy
+    - low_complexity
+    - medium_disruption
+    - CCE-80141-5
+    - NIST-800-53-CM-7
+    - NIST-800-171-3.4.6
+
+- name: Ensure kernel module 'jffs2' is disabled
+  lineinfile:
+    create=yes
+    dest="/etc/modprobe.d/{{item}}.conf"
+    regexp="{{item}}"
+    line="install {{item}} /bin/true"
+  with_items:
+    - jffs2
+  tags:
+    - kernel_module_jffs2_disabled
+    - low_severity
+    - disable_strategy
+    - low_complexity
+    - medium_disruption
+    - CCE-80139-9
+    - NIST-800-53-CM-7
+    - NIST-800-171-3.4.6
+
+- name: Ensure kernel module 'hfs' is disabled
+  lineinfile:
+    create=yes
+    dest="/etc/modprobe.d/{{item}}.conf"
+    regexp="{{item}}"
+    line="install {{item}} /bin/true"
+  with_items:
+    - hfs
+  tags:
+    - kernel_module_hfs_disabled
+    - low_severity
+    - disable_strategy
+    - low_complexity
+    - medium_disruption
+    - CCE-80140-7
+    - NIST-800-53-CM-7
+    - NIST-800-171-3.4.6
+
+
+- name: Ensure kernel module 'cramfs' is disabled
+  lineinfile:
+    create=yes
+    dest="/etc/modprobe.d/{{item}}.conf"
+    regexp="{{item}}"
+    line="install {{item}} /bin/true"
+  with_items:
+    - cramfs
+  tags:
+    - kernel_module_cramfs_disabled
+    - low_severity
+    - disable_strategy
+    - low_complexity
+    - medium_disruption
+    - CCE-80137-3
+    - NIST-800-53-CM-7
+    - NIST-800-171-3.4.6
+  
+- name: Ensure kernel module 'freevxfs' is disabled
+  lineinfile:
+    create=yes
+    dest="/etc/modprobe.d/{{item}}.conf"
+    regexp="{{item}}"
+    line="install {{item}} /bin/true"
+  with_items:
+    - freevxfs
+  tags:
+    - kernel_module_freevxfs_disabled
+    - low_severity
+    - disable_strategy
+    - low_complexity
+    - medium_disruption
+    - CCE-80138-1
+    - NIST-800-53-CM-7
+    - NIST-800-171-3.4.6

@@ -58,6 +58,16 @@
     - V-72261
     - V-72263
 
+- name: Disable GSSAPI Authentication
+  lineinfile:
+    path: "/etc/ssh/sshd_config"
+    regexp: "GSSAPIAuthentication"
+    line: "GSSAPIAuthentication no"
+  when:
+    - security_sshd_disallow_gssapi
+  tags:
+    - V-72259
+
 - name: Ensure sshd is enabled at boot time
   service:
     name: "{{ ssh_service }}"
@@ -110,3 +120,25 @@
     - medium
     - sshd
     - V-72257
+
+- name: Enable SSH Warning Banner
+  lineinfile:
+    create: yes
+    dest: /etc/ssh/sshd_config
+    regexp: ^Banner
+    line: Banner /etc/issue
+    validate: sshd -t -f %s
+  tags:
+    - sshd_enable_warning_banner
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - NIST-800-53-AC-8(a)
+    - NIST-800-53-AC-8(b)
+    - NIST-800-53-AC-8(c)(1)
+    - NIST-800-53-AC-8(c)(2)
+    - NIST-800-53-AC-8(c)(3)
+    - NIST-800-171-3.1.9
+    - CJIS-5.5.6
+    - DISA-STIG-RHEL-07-040170

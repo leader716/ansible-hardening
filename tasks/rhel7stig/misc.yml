@@ -244,7 +244,6 @@
 - name: Start and enable chrony
   service:
     name: "{{ chrony_service }}"
-    state: started
     enabled: yes
   when:
     - not check_mode
@@ -297,6 +296,15 @@
     - medium
     - misc
     - V-72273
+
+- name: Update the default firewalld zone
+  lineinfile:
+    path: /etc/firewalld/firewalld.conf
+    regexp: '^DefaultZone=.*$'
+    line: "DefaultZone={{ security_enable_firewalld_default_zone }}"
+  when: 
+    - security_enable_firewalld | bool
+    - security_enable_firewalld_default_zone is defined
 
 - name: Limit new TCP connections to 25/minute and allow bursting to 100
   command: "firewall-cmd --direct --add-rule ipv4 filter IN_public_allow 0 -m tcp -p tcp -m limit --limit {{ security_enable_firewalld_rate_limit_per_minute }}/minute --limit-burst {{ security_enable_firewalld_rate_limit_burst }} -j ACCEPT"

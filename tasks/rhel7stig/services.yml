@@ -1,0 +1,31 @@
+---
+- name: Check rpcbind status
+  command: systemctl status rpcbind
+  register: rpcbind_status_check
+  failed_when: rpcbind_status_check.rc not in [0,3,4]
+  changed_when: False
+  check_mode: no
+  tags:
+    - always
+
+- debug: var=rpcbind_status_check
+
+- name: Disable service rpcbind
+  service:
+    name: "{{item}}"
+    enabled: "no"
+    state: "stopped"
+  with_items:
+    - rpcbind.service
+    - rpcbind.socket
+  when:
+    - rpcbind_status_check.rc not in [3,4]
+    - security_disable_rpcbind | bool
+  tags:
+    - service_rpcbind_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - CCE-80230-6
+...

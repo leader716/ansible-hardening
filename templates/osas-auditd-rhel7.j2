@@ -39,13 +39,22 @@
 {#                                                                           #}
 {% if audited_command['arch_specific'] %}
 {% for arch in auditd_architectures %}
+{% if audited_command['arch'] is not defined or arch in audited_command['arch'] %}
 -a always,exit -F arch={{ arch }} -S {{ audited_command['command'] }}  -F perm=x -F auid>=1000 -F auid!=4294967295 -k {{ audited_command['stig_id'] }}
+{% endif %}
 {% endfor %}
 {% else %}
 -a always,exit -F path={{ audited_command['path'] | default('/usr/bin') }}/{{ audited_command['command'] }} -F perm=x -F auid>=1000 -F auid!=4294967295 -k {{ audited_command['stig_id'] }}
 {% endif %}
 {% endif %}
+{% endfor %}
 
+{% for access_request_type in audit_access_request_type %}
+{% for arch in auditd_architectures %}
+{% for access_type in ["-EACCES", "-EPERM"] %}
+-a always,exit -F arch={{ arch }} -S {{ access_request_type }} -F exit={{ access_type }} -F auid>=1000 -F auid!=4294967295 -F key=access
+{% endfor %}
+{% endfor %}
 {% endfor %}
 
 # Other audited events
@@ -73,17 +82,17 @@
 
 {% if security_rhel7_audit_insmod | bool %}
 # V-72191 - All uses of the insmod command must be audited.
--w /sbin/insmod -p x -F auid!=4294967295 -k V-72191
+-w /usr/sbin/insmod -p x -k V-72191
 {% endif %}
 
 {% if security_rhel7_audit_rmmod | bool %}
 # V-72193 - All uses of the rmmod command must be audited.
--w /sbin/rmmod -p x -F auid!=4294967295 -k V-72193
+-w /usr/sbin/rmmod -p x -k V-72193
 {% endif %}
 
 {% if security_rhel7_audit_modprobe | bool %}
 # V-72195 - All uses of the modprobe command must be audited.
--w /sbin/modprobe -p x -F auid!=4294967295 -k V-72195
+-w /usr/sbin/modprobe -p x -k V-72195
 {% endif %}
 
 {% if security_rhel7_audit_account_actions | bool %}

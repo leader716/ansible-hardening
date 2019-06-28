@@ -1,0 +1,11 @@
+---
+- name: logrotate configuration
+  template:
+    dest: /etc/logrotate.conf
+    src: logrotate.conf.j2
+  tags:
+    - logrotate
+    - misc
+
+
+...

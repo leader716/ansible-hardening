@@ -84,21 +84,21 @@
     - high
     - V-71937
 
-- name: Lock accounts after three failed login attempts a 15 minute period
-  blockinfile:
-    dest: "{{ pam_password_file }}"
-    state: present
-    marker: "# {mark} MANAGED BY ANSIBLE-HARDENING"
-    insertbefore: EOF
-    block: "{{ lookup('template', 'pam_faillock.j2') }}"
-  when:
-    - ansible_pkg_mgr in ['yum', 'zypper']
-    - security_pam_faillock_enable | bool
-  tags:
-    - auth
-    - medium
-    - V-71943
-    - V-71945
+# - name: Lock accounts after three failed login attempts a 15 minute period
+#   blockinfile:
+#     dest: "{{ pam_password_file }}"
+#     state: present
+#     marker: "# {mark} MANAGED BY ANSIBLE-HARDENING"
+#     insertbefore: EOF
+#     block: "{{ lookup('template', 'pam_faillock.j2') }}"
+#   when:
+#     - ansible_pkg_mgr in ['yum', 'zypper']
+#     - security_pam_faillock_enable | bool
+#   tags:
+#     - auth
+#     - medium
+#     - V-71943
+#     - V-71945
 
 # NOTE(mhayden): The unusual regex here ensures that we're omitting any lines
 # that are commented out. Some commented lines may be preprended with spaces,
@@ -219,26 +219,133 @@
     - low
     - V-72217
 
-- name: Check for pam_lastlog in PAM configuration
-  command: "grep pam_lastlog {{ pam_postlogin_file }}"
-  register: pam_lastlog_check
-  changed_when: False
-  failed_when: False
-  check_mode: no
-  tags:
-    - always
+# - name: Check for pam_lastlog in PAM configuration
+#   command: "grep pam_lastlog {{ pam_postlogin_file }}"
+#   register: pam_lastlog_check
+#   changed_when: False
+#   failed_when: False
+#   check_mode: no
+#   tags:
+#     - always
 
-- name: V-72275 - Display date/time of last logon after logon
-  debug:
-    msg: >
-      The 'pam_lastlog' directive is missing in {{ pam_postlogin_file }}.
-      This is required by V-72275.
+# - name: V-72275 - Display date/time of last logon after logon
+#   debug:
+#     msg: >
+#       The 'pam_lastlog' directive is missing in {{ pam_postlogin_file }}.
+#       This is required by V-72275.
+#   when:
+#     - pam_lastlog_check.rc != 0
+#   tags:
+#     - low
+#     - auth
+#     - V-72275
+
+
+- name: set auth pam_faillock before pam_unix.so
+  pamd:
+    name: system-auth
+    type: auth
+    control: sufficient
+    module_path: pam_unix.so
+    new_type: auth
+    new_control: required
+    new_module_path: pam_faillock.so
+    module_arguments: 'preauth
+        silent
+        {{ security_pam_faillock_deny_root | bool | ternary("even_deny_root","") }}
+        deny={{ security_pam_faillock_attempts }}
+        unlock_time={{ security_pam_faillock_unlock_time }}
+        fail_interval={{ security_pam_faillock_interval }}'
+    state: before
   when:
-    - pam_lastlog_check.rc != 0
+    - ansible_pkg_mgr in ['yum', 'zypper']
+    - security_pam_faillock_enable | bool
   tags:
-    - low
-    - auth
-    - V-72275
+    - accounts_passwords_pam_faillock_deny_root
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - CCE-80353-6
+    - NIST-800-53-AC-7(b)
+    - DISA-STIG-RHEL-07-010330
+
+- name: set auth pam_faillock after pam_unix.so
+  pamd:
+    name: system-auth
+    type: auth
+    control: sufficient
+    module_path: pam_unix.so
+    new_type: auth
+    new_control: '[default=die]'
+    new_module_path: pam_faillock.so
+    module_arguments: 'preauth
+        silent
+        {{ security_pam_faillock_deny_root | bool | ternary("even_deny_root","") }}
+        deny={{ security_pam_faillock_attempts }}
+        unlock_time={{ security_pam_faillock_unlock_time }}
+        fail_interval={{ security_pam_faillock_interval }}'
+    state: after
+  when:
+    - ansible_pkg_mgr in ['yum', 'zypper']
+    - security_pam_faillock_enable | bool
+  tags:
+    - accounts_passwords_pam_faillock_deny_root
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - CCE-80353-6
+    - NIST-800-53-AC-7(b)
+    - DISA-STIG-RHEL-07-010330
+
+- name: set account pam_faillock before pam_unix.so
+  pamd:
+    name: system-auth
+    type: account
+    control: required
+    module_path: pam_unix.so
+    new_type: account
+    new_control: required
+    new_module_path: pam_faillock.so
+    state: before
+  when:
+    - ansible_pkg_mgr in ['yum', 'zypper']
+    - security_pam_faillock_enable | bool
+  tags:
+    - accounts_passwords_pam_faillock_deny_root
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - CCE-80353-6
+    - NIST-800-53-AC-7(b)
+    - DISA-STIG-RHEL-07-010330
+
+- name: pam_unix remember recent password
+  pamd:
+    name: system-auth
+    type: password
+    control: sufficient
+    module_path: pam_unix.so
+    module_arguments: 'sha512 
+        shadow 
+        try_first_pass 
+        use_authtok 
+        remember={{ security_pam_password_remember }}S'
+    state: updated
+  when:
+    - ansible_pkg_mgr in ['yum', 'zypper']
+    - security_pam_faillock_enable | bool
+  tags:
+    - accounts_passwords_pam_faillock_deny_root
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - CCE-80353-6
+    - NIST-800-53-AC-7(b)
+    - DISA-STIG-RHEL-07-010330
 
 - name: Ensure .shosts find has finished
   async_status:

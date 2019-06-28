@@ -65,7 +65,6 @@
     state: stopped
     enabled: no
   when:
-    - kdump_service_check.rc not in [3,4]
     - security_disable_kdump
   tags:
     - kernel
@@ -108,3 +107,14 @@
     - kernel
     - medium
     - V-77821
+
+- name: V-77821 - Stream Control Transmission Protocol (SCTP) kernel module must be disabled
+  lineinfile:
+    dest: /etc/modprobe.d/ansible-hardening-disable-sctp.conf
+    line: install sctp /bin/true
+    create: yes
+  when:
+    - security_rhel7_disable_sctp | bool
+  tags:
+    - kernel
+    - medium

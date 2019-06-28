@@ -77,6 +77,9 @@ audited_commands:
   - command: creat
     stig_id: V-72123
     arch_specific: yes
+  - command: create_module
+    stig_id: V-78999
+    arch_specific: yes
   - command: crontab
     stig_id: V-72183
     arch_specific: no
@@ -95,6 +98,9 @@ audited_commands:
   - command: fchownat
     stig_id: V-72103
     arch_specific: yes
+  - command: finit_module
+    stig_id: V-79001
+    arch_specific: yes
   - command: fremovexattr
     stig_id: V-72119
     arch_specific: yes
@@ -105,6 +111,9 @@ audited_commands:
     stig_id: V-72133
     arch_specific: yes
   - command: init_module
+    stig_id: V-72187
+    arch_specific: yes
+  - command: delete_module
     stig_id: V-72187
     arch_specific: yes
   - command: gpasswd
@@ -120,9 +129,8 @@ audited_commands:
     stig_id: V-72115
     arch_specific: yes
   - command: mount
-    path: /bin
     stig_id: V-72171
-    arch_specific: no
+    arch_specific: yes
   - command: newgrp
     stig_id: V-72165
     arch_specific: no
@@ -182,25 +190,25 @@ audited_commands:
     stig_id: V-72179
     arch_specific: no
   - command: su
-    path: /bin
+    path: /usr/bin
     stig_id: V-72159
     arch_specific: no
   - command: sudo
     stig_id: V-72161
     arch_specific: no
   - command: sudoedit
-    path: /bin
+    path: /usr/bin
     stig_id: V-72169
     arch_specific: no
   - command: truncate
     stig_id: V-72131
     arch_specific: yes
   - command: umount
-    path: /bin
+    path: /usr/bin
     stig_id: V-72173
     arch_specific: no
   - command: unix_chkpwd
-    path: /sbin
+    path: /usr/sbin
     stig_id: V-72151
     arch_specific: no
   - command: unlink
@@ -217,6 +225,43 @@ audited_commands:
     path: /usr/sbin
     stig_id: V-72141
     arch_specific: no
+  - command: pam_timestamp_check
+    path: /usr/sbin
+    stig_id: V-72185
+    arch_specific: no
+  - command: rmmod
+    path: /usr/sbin
+    stig_id: V-72193
+    arch_specific: no
+  - command: modprobe
+    path: /usr/sbin
+    stig_id: V-72195
+    arch_specific: no
+  - command: stime
+    stig_id: stime
+    arch: b32
+    arch_specific: yes
+  - command: settimeofday
+    stig_id: settimeofday
+    arch_specific: yes
+  - command: localtime
+    path: /etc
+    stig_id: localtime
+    arch_specific: no
+  - command: clock_settime
+    stig_id: clock_settime
+    arch_specific: yes
+  - command: adjtimex
+    stig_id: adjtimex
+    arch_specific: yes
+
+audit_access_request_type:
+  - "open"
+  - "open_by_handle_at"
+  - "creat"
+  - "ftruncate"
+  - "truncate"
+  - "openat"
 
 ## Password quality settings
 # This variable is used in main/rhel7stig/auth.yml to set password quality
@@ -356,3 +401,27 @@ sysctl_settings_rhel7:
   - name: net.ipv6.conf.all.disable_ipv6
     value: 1
     enabled: "{{ (security_contrib_enabled | bool) and (security_contrib_disable_ipv6 | bool) }}"
+  - name: fs.suid_dumpable
+    value: 0
+    enabled: "{{ security_suid_dumpable | bool }}"
+  - name: net.ipv4.conf.all.secure_redirects
+    value: 0
+    enabled: true
+  - name: net.ipv4.icmp_ignore_bogus_error_responses
+    value: 1
+    enabled: true
+  - name: net.ipv4.tcp_syncookies
+    value: 1
+    enabled: true
+  - name: net.ipv4.conf.all.accept_redirects
+    value: 0
+    enabled: true
+  - name: net.ipv4.conf.all.log_martians
+    value: 1
+    enabled: true
+  - name: net.ipv4.conf.default.log_martians
+    value: 1
+    enabled: true
+  - name: net.ipv4.conf.default.secure_redirects
+    value: 0
+    enabled: true
